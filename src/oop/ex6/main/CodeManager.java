@@ -21,6 +21,7 @@ class CodeManager {
     }
 
     int runValidations(){
+        /*
         for (Variable var : variableObjects){
             try {
                 var.isValid();
@@ -37,7 +38,8 @@ class CodeManager {
             }
             catch ()
         }
-
+*/
+        return 0;
     }
 
 

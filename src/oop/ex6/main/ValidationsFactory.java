@@ -15,7 +15,7 @@ class ValidationsFactory {
 
     private Collection<Variable> variableObjects;
 
-    private CodeManager codeManager = new CodeManager();
+//    private CodeManager codeManager = new CodeManager();
 
 
     static ValidationsFactory getInstance() {
@@ -28,6 +28,7 @@ class ValidationsFactory {
 
 
     CodeManager getCodeManager(){
+        return null;
 
     }
 }
