@@ -16,6 +16,7 @@ public class Sjavac {
     private static final int ILLEGAL_CODE = 1;
     private static final int EXCEPTION_THROWN = 2;
     private static final String BAD_FILE = "ERROR: ILLEGAL FILE";
+    public static final String VARIABLE_TYPES ="(int|double|boolean|char|String)";
 
 
     /**
