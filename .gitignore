@@ -2,3 +2,4 @@
 *.xml
 *.iml
 src/oop/ex6/main/SjavacTest.java
+src/oop/ex6/validations/MethodTest.java
