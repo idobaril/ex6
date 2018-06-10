@@ -1,10 +1,9 @@
 package oop.ex6.main;
 
 import oop.ex6.validations.BadFormatException;
+import oop.ex6.validations.Comment;
 import oop.ex6.validations.Scope;
 import oop.ex6.validations.Variable;
-
-import javax.xml.stream.events.Comment;
 import java.util.Collection;
 
 class CodeManager {
@@ -33,12 +32,22 @@ class CodeManager {
 
         for (Scope scope : scopeObjects){
             try {
-
+                scope.isValid();
             }
-            catch ()
+            catch (BadFormatException e){
+                System.err.println(e.getMessage());
+                return 1;
+            }
         }
-
+        for (Comment comment : commentsObjects){
+            try{
+                comment.isValid();
+            }
+            catch (BadFormatException e){
+                System.err.println(e.getMessage());
+                return 1;
+            }
+        }
+        return 0;
     }
-
-
 }

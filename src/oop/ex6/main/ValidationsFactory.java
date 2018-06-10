@@ -15,7 +15,7 @@ class ValidationsFactory {
 
     private Collection<Variable> variableObjects;
 
-    private CodeManager codeManager = new CodeManager();
+    private CodeManager codeManager = new CodeManager(scopeObjects, commentsObjects, variableObjects);
 
 
     static ValidationsFactory getInstance() {
@@ -27,7 +27,16 @@ class ValidationsFactory {
     }
 
 
-    CodeManager getCodeManager(){
+    private void createValidationsObjects(Collection<String> fileLines){
 
+
+    }
+
+
+
+
+    CodeManager getCodeManager(Collection<String> fileLines){
+        createValidationsObjects(fileLines);
+        return codeManager;
     }
 }

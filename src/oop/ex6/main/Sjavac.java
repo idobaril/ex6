@@ -5,8 +5,7 @@ import java.util.Collection;
 public class Sjavac {
 
 
-
-    static Collection<String> parseFile (String path){
+    static Collection<String> parseFile(String path) {
         // try catch
         // open file
         // skip empty lines
@@ -15,15 +14,13 @@ public class Sjavac {
     }
 
 
-    static boolean validateCode(CodeManager codeManager){
-
-    }
-
 
     public static void main(String[] args) {
         Collection<String> fileLines = parseFile(args[0]);
         ValidationsFactory factory = ValidationsFactory.getInstance();
-        CodeManager codeManager = factory.getCodeManager();
-        return codeManager.runValidations();
+        CodeManager codeManager = factory.getCodeManager(fileLines);
+        int codeVerifyValue = codeManager.runValidations();
+
+        System.out.println(codeVerifyValue);
     }
 }
