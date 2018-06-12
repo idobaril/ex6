@@ -5,7 +5,7 @@ package oop.ex6.validations;
  */
 class UnknownMethodLineException extends BadFormatException{
 
-    UnknownMethodLineException(String line){
+    UnsupportedOperation(String line){
         super(line);
     }
 }
