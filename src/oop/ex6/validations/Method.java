@@ -24,13 +24,12 @@ public class Method extends Scope implements Validable{
     static private ArrayList<String> methodList= null;
 
     /**Regex for the method name.*/
-    static private String methodNameRegex = "\\s*void\\s+([a-zA-Z]+\\w*)";
+    static private String methodNameRegex = "\\s*void\\s+([a-zA-Z]+\\w*)\\s*";
 
     /**Regex for the signature of the method.*/
-    static private String methodSignatureRegex =
-            "\\(((?:"+variableInMethodSignatureRegex+",)*"+
-                    variableInMethodSignatureRegex+")?\\)\\s*\\{\\s*";
-    private static Pattern signaturePattern = Pattern.compile(methodSignatureRegex);
+    private static Pattern signaturePattern = Pattern.compile(methodNameRegex
+            + "\\(((?:"+variableInMethodSignatureRegex+",)*"+
+            variableInMethodSignatureRegex+")?\\)\\s*\\{\\s*");
 
     /**Regex for an if block.*/
     private static Pattern ifBlockPattern = Pattern.compile("\\s*if\\s*\\(");
@@ -179,6 +178,7 @@ public class Method extends Scope implements Validable{
     }
 
     public boolean isValid() throws BadFormatException{
+        System.out.println("starting method check");
         checkMethodSignature(scope.get(0));
         System.out.println("signature ok");
         checkMethodBody();
@@ -186,7 +186,7 @@ public class Method extends Scope implements Validable{
     }
 
     /**
-     * Checks if the methoc call is valid, by comparing amount and type of arguments.
+     * Checks if the method call is valid, by comparing amount and type of arguments.
      * @param methodCallArgs The arguments in the method call.
      * @param line The line in which the method is called.
      * @throws BadFormatException Exception.
