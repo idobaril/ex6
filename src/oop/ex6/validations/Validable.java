@@ -12,6 +12,4 @@ public interface Validable {
      * @throws BadFormatException Exception.
      */
     boolean isValid() throws BadFormatException;
-
-
 }

@@ -14,7 +14,8 @@ abstract class Regex {
     /** Regex of the a variable type only (without name)*/
     static Pattern variableType =  Pattern.compile("\\s*(final\\s+)?"+Sjavac.VARIABLE_TYPES+"\\s+");
 
-    /**Regex for a single variable inside the method signature.*/
+    /**Regex for a single variable inside the method signature.
+     * I THINK THIS IS WRONG BECAUSE IT CAN HAVE DIGITS*/
     static Pattern variableInMethodSignature = Pattern.compile(variableType +"((_\\w+)|([a-zA-Z]+))\\s*");
 
     /**Regex for variable declaration. THIS STILL NEEDS TO BE WORKED ON*/

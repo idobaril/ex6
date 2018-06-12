@@ -1,6 +1,7 @@
 package oop.ex6.main;
 
 import oop.ex6.validations.Method;
+import oop.ex6.validations.MethodBracketsException;
 import oop.ex6.validations.Scope;
 
 import java.io.BufferedReader;
@@ -8,6 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,7 +20,6 @@ public class Sjavac {
     /**Holds a list of global variables declared in main.*/
     public static ArrayList<String> globalVarList = null;
     public static ArrayList<String> methodList = null;
-
 
     private static final int PATH_ARG = 0;
     private static final int LEGAL_CODE = 0;
@@ -47,9 +48,9 @@ public class Sjavac {
      * @param path The path given by the user.
      * @return An array list of strings representing the code.
      */
-    static private Collection<String> parseFile (String path){
+    static private LinkedList<String> parseFile (String path){
         Pattern p = Pattern.compile("\\s*"); //Empty line regex
-        Collection<String> codeLines = new ArrayList<>();
+        LinkedList<String> codeLines = new LinkedList<>();
         try {
             BufferedReader newBuff = new BufferedReader(new FileReader(path));
             String line = newBuff.readLine();
@@ -69,9 +70,17 @@ public class Sjavac {
 
 
     public static void main(String[] args) {
-        Collection<String> fileLines = parseFile(args[PATH_ARG]);
-//        ValidationsFactory factory = ValidationsFactory.getInstance();
-//        CodeManager codeManager = factory.getCodeManager();
-//        codeManager.runValidations();
+        LinkedList<String> fileLines = parseFile(args[PATH_ARG]);
+        ValidationsFactory factory = ValidationsFactory.getInstance();
+        try {
+            CodeManager codeManager = factory.getCodeManager(fileLines);
+            System.out.println("HERE");
+            codeManager.runValidations();
+        }
+        catch (MethodBracketsException e){
+            System.out.println("problem with brackets");
+        }
     }
 }
+
+

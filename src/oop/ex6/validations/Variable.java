@@ -8,6 +8,11 @@ public class Variable implements Validable{
 //    LinkedList<Variable> localVarList = new LinkedList<>();
     boolean isFinal;
 
+    public Variable(String st){
+
+    }
+
+
     Variable(boolean isFinal, String type, String name, String value){//, LinkedList<Variable> localVarList){
         this.isFinal = isFinal;
         this.type = type;

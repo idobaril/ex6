@@ -1,5 +1,6 @@
 package oop.ex6.validations;
 
+import oop.ex6.main.CodeManager;
 import oop.ex6.main.Sjavac;
 
 import java.util.*;
@@ -20,13 +21,18 @@ public class Method extends Scope implements Validable{
     /**List of variables that are local with respect to the method's scope.*/
     private LinkedList<Variable> localVarList = new LinkedList<>();
 
-    Method(List<String> scope){
+    public Method(List<String> scope){
         super(scope);
     }
 
 
     public boolean isValid() throws BadFormatException{
+        for (String line : scope){
+            System.out.println(line);
+        }
+        System.out.println("\n");
         checkMethodSignature(scope.get(0));
+        System.out.println("signature okay");
         checkMethodBody();
         return true;
     }
@@ -46,6 +52,7 @@ public class Method extends Scope implements Validable{
         }
         return answer;
     }
+
 
 
     private void parseMethodArgs(String[] args, String line) throws BadFormatException{
@@ -105,11 +112,11 @@ public class Method extends Scope implements Validable{
             curLine = scope.get(j);
             System.out.println("curLine is " + curLine);
             if(Regex.ifBlock.matcher(curLine).lookingAt()){
-                j = checkIfBlock(j);
+//                j = checkIfBlock(j);
                 j++;
             }
             else if(Regex.whileBlock.matcher(curLine).lookingAt()){
-                j = checkWhileBlock(j);
+//                j = checkWhileBlock(j);
                 j++;
             }
             else if(Regex.varDeclaration.matcher(curLine).lookingAt()){
@@ -122,6 +129,7 @@ public class Method extends Scope implements Validable{
                 j++;
             }
             else if(Regex.methodCall.matcher(curLine).lookingAt()){
+                System.out.println("METHOD CALL");
                 checkMethodCall(curLine);
                 j++;
             }
@@ -130,6 +138,7 @@ public class Method extends Scope implements Validable{
             }
 
             else{
+//                System.out.println("ARE YOU HERE");
                 throw new UnsupportedOperation(curLine);
             }
         }
@@ -179,7 +188,7 @@ public class Method extends Scope implements Validable{
      * @throws BadFormatException Exception.
      */
     private void methodExists(String methodName, String line) throws BadFormatException{
-        if (!Sjavac.methods.contains(methodName)){
+        if (!CodeManager.getMethodObjects().contains(methodName)){
             throw new UnknownMethodException(line);
         }
     }
