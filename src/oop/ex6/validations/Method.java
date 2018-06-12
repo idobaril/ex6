@@ -8,6 +8,12 @@ import java.util.regex.Pattern;
 
 public class Method extends Scope implements Validable{
 
+    /**The name of the method.*/
+    private String name;
+
+    /**The arguments of this method's input.*/
+    private LinkedList<String> methodArguments = new LinkedList<>();
+
     /**Holds a list of global variables declared in main.*/
     private ArrayList<String> globalVarList = null;
 
@@ -17,9 +23,12 @@ public class Method extends Scope implements Validable{
     /**Holds a list of the methods declared in the code, including their signatures.*/
     static private ArrayList<String> methodList= null;
 
+    /**Regex for the method name.*/
+    static private String methodNameRegex = "\\s*void\\s+([a-zA-Z]+\\w*)";
+
     /**Regex for the signature of the method.*/
     static private String methodSignatureRegex =
-            "\\s*void\\s+[a-zA-Z]+\\w*\\((("+variableInMethodSignatureRegex+",)*"+
+            "\\(((?:"+variableInMethodSignatureRegex+",)*"+
                     variableInMethodSignatureRegex+")?\\)\\s*\\{\\s*";
     private static Pattern signaturePattern = Pattern.compile(methodSignatureRegex);
 
@@ -48,8 +57,10 @@ public class Method extends Scope implements Validable{
         super(scope);
     }
 
+
     /**
-     * Checks the signature of a method.
+     * Checks the signature of a method. If it is valid, saves all the input arguments in a linked list.
+     * Also, saves the method name in a linked list.
      * @param firstLine The String representing the method signature.
      * @throws BadFormatException Exception.
      */
@@ -58,13 +69,37 @@ public class Method extends Scope implements Validable{
         if(!m.matches()){
             throw new BadMethodSignature(firstLine);
         }
+        else{
+            name = m.group(1);
+            String[] methodSignature = m.group(2).split(",");
+            for (String arg : methodSignature){
+                Matcher matcher = Pattern.compile(variableTypeRegex).matcher(arg);
+                matcher.find();
+                String type = matcher.group(1);
+                methodArguments.add(type);
+            }
+        }
+//        CHECKS THAT ARGUMENTS ARE READ CORRECTLY
+//        System.out.println("printing method arguments:");
+//        for (String item : methodArguments){
+//            System.out.println(item);
+//        }
+//        System.out.println("\n");
+    }
+
+    /**
+     * Returns the name of the method.
+     * @return The name of the method.
+     */
+    public String getName(){
+        return name;
     }
 
     /**
      * Checks the method body.
-     * @throws UnknownMethodLineException exception.
+     * @throws UnsupportedOperation exception.
      */
-    private void checkMethodBody() throws UnknownMethodLineException{
+    private void checkMethodBody() throws BadFormatException{
         int j = 1;
         String curLine;
         while (j < scope.size()-1){
@@ -96,7 +131,7 @@ public class Method extends Scope implements Validable{
             }
 
             else{
-                throw new UnknownMethodLineException(curLine);
+                throw new UnsupportedOperation(curLine);
             }
         }
     }
@@ -109,19 +144,62 @@ public class Method extends Scope implements Validable{
         return -1;
     }
 
-    private void checkVarDeclaration(String curLine) {
+    private static void checkVarDeclaration(String curLine) {
+//        new Variable(curLine).isValid();
     }
 
     private void checkVarAssignment(String curLine) {
+//        new Variable(curLine).isValid();
     }
 
-    private void checkMethodCall(String curLine) {
+    /**
+     * Checks if the method call syntax is correct
+     * @param curLine The string representing the method call.
+     * @throws BadFormatException Exception.
+     */
+    private void checkMethodCall(String curLine) throws BadFormatException{
+        Matcher matcher = Pattern.compile(methodNameRegex).matcher(curLine);
+        matcher.lookingAt();
+        String methodName = matcher.group(1);
+        methodExists(methodName, curLine);
+        String[] arguments = matcher.group(2).split(",");
+        isMethodCallValid(arguments, curLine);
+    }
+
+    /**
+     * Checks if a method exists.
+     * @param methodName The method name.
+     * @param line The line in which the method is called.
+     * @throws BadFormatException Exception.
+     */
+    private void methodExists(String methodName, String line) throws BadFormatException{
+        if (!Sjavac.methods.contains(methodName)){
+            throw new UnknownMethodException(line);
+        }
     }
 
     public boolean isValid() throws BadFormatException{
         checkMethodSignature(scope.get(0));
+        System.out.println("signature ok");
         checkMethodBody();
         return true;
+    }
+
+    /**
+     * Checks if the methoc call is valid, by comparing amount and type of arguments.
+     * @param methodCallArgs The arguments in the method call.
+     * @param line The line in which the method is called.
+     * @throws BadFormatException Exception.
+     */
+    private void isMethodCallValid(String[] methodCallArgs, String line) throws BadFormatException{
+        if (methodCallArgs.length != methodArguments.size()){
+            throw new WrongNumOfArgumentsException(line);
+        }
+        for (int j=0; j<methodCallArgs.length; j++){
+            if (!methodCallArgs[j].equals(methodArguments.get(j))){
+                throw new WrongVariableTypeException(line);
+            }
+        }
     }
 
 }

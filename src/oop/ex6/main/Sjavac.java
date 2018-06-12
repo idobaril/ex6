@@ -1,5 +1,6 @@
 package oop.ex6.main;
 
+import oop.ex6.validations.Method;
 import oop.ex6.validations.Scope;
 
 import java.io.BufferedReader;
@@ -20,6 +21,7 @@ public class Sjavac {
     private static final int EXCEPTION_THROWN = 2;
     private static final String BAD_FILE = "ERROR: ILLEGAL FILE";
     public static final String VARIABLE_TYPES ="(int|double|boolean|char|String)";
+    public static List<Method> methods = null;
 
 
     /**
