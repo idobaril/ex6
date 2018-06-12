@@ -12,50 +12,61 @@ public class Method extends Scope implements Validable{
     private String name;
 
     /**The arguments of this method's input.*/
-    private LinkedList<String> methodArguments = new LinkedList<>();
-
-    /**Holds a list of global variables declared in main.*/
-    private ArrayList<String> globalVarList = null;
+    private LinkedList<Variable> methodArguments = new LinkedList<>();
 
     /**Holds a list of all variables known to the method (local and global).*/
-    private ArrayList<String> allVarList = null;
+    private ArrayList<String> allVarList = Sjavac.globalVarList;
 
-    /**Holds a list of the methods declared in the code, including their signatures.*/
-    static private ArrayList<String> methodList= null;
-
-    /**Regex for the method name.*/
-    static private String methodNameRegex = "\\s*void\\s+([a-zA-Z]+\\w*)\\s*";
-
-    /**Regex for the signature of the method.*/
-    private static Pattern signaturePattern = Pattern.compile(methodNameRegex
-            + "\\(((?:"+variableInMethodSignatureRegex+",)*"+
-            variableInMethodSignatureRegex+")?\\)\\s*\\{\\s*");
-
-    /**Regex for an if block.*/
-    private static Pattern ifBlockPattern = Pattern.compile("\\s*if\\s*\\(");
-
-    /**Regex for a while block.*/
-    private static Pattern whileBlockPattern = Pattern.compile("\\s*while\\s*\\(");
-
-    /**Regex for variable declaration.*/
-    private static Pattern varDeclarationPattern = Pattern.compile("\\s*(final\\s+)?"+Sjavac.VARIABLE_TYPES+"\\s+");
-
-    /**Regex for return.*/
-    private static Pattern returnPattern = Pattern.compile("\\s*return\\s*;\\s*");
-
-    /**Regex for method call.*/
-    private static Pattern methodCallPattern = Pattern.compile("\\s*"+methodList+"\\s*\\(");
-
-    /**Regex for variable assignment.*/
-    private Pattern varAssignmentPattern = Pattern.compile("\\s*"+allVarList+"\\s*=");
-
-    enum LineType{VAR_DECLARATION, VAR_ASSIGNMENT, METHOD_CALL, IF_BLOCK, WHILE_BLOCK, RETURN}
-
+    /**List of variables that are local with respect to the method's scope.*/
+    private LinkedList<Variable> localVarList = new LinkedList<>();
 
     Method(List<String> scope){
         super(scope);
     }
 
+
+    public boolean isValid() throws BadFormatException{
+        checkMethodSignature(scope.get(0));
+        checkMethodBody();
+        return true;
+    }
+
+    /**
+     * Overriding object's equals to compare method names.
+     * @param obj The object to compare to.
+     * @return true if name is the same, false if name is different or if obj isn't a Method object..
+     */
+    public boolean equals(Object obj){
+        boolean answer;
+        try{
+            answer = this.name.equals(obj);
+        }
+        catch (Exception e){
+            return false;
+        }
+        return answer;
+    }
+
+
+    private void parseMethodArgs(String[] args, String line) throws BadFormatException{
+        for (String arg : args){
+            Matcher matcher = Regex.variableInMethodSignature.matcher(arg);
+            matcher.find();
+            boolean isFinal = false;
+            String finalArg = matcher.group(1);
+            if (finalArg !=null){
+                isFinal = true;
+            }
+            String type = matcher.group(2);
+            String name = matcher.group(3);
+            Variable localVar = new Variable(isFinal, type, name);
+            methodArguments.add(localVar);
+            if (localVarList.contains(localVar)){
+                throw new DuplicateVariableException(line);
+            }
+            localVarList.add(localVar);
+        }
+    }
 
     /**
      * Checks the signature of a method. If it is valid, saves all the input arguments in a linked list.
@@ -64,26 +75,15 @@ public class Method extends Scope implements Validable{
      * @throws BadFormatException Exception.
      */
     private void checkMethodSignature(String firstLine) throws BadFormatException{
-        Matcher m = signaturePattern.matcher(firstLine);
+        Matcher m = Regex.signaturePattern.matcher(firstLine);
         if(!m.matches()){
             throw new BadMethodSignature(firstLine);
         }
         else{
             name = m.group(1);
-            String[] methodSignature = m.group(2).split(",");
-            for (String arg : methodSignature){
-                Matcher matcher = Pattern.compile(variableTypeRegex).matcher(arg);
-                matcher.find();
-                String type = matcher.group(1);
-                methodArguments.add(type);
-            }
+            String[] methodArguments= m.group(2).split(",");
+            parseMethodArgs(methodArguments, firstLine);
         }
-//        CHECKS THAT ARGUMENTS ARE READ CORRECTLY
-//        System.out.println("printing method arguments:");
-//        for (String item : methodArguments){
-//            System.out.println(item);
-//        }
-//        System.out.println("\n");
     }
 
     /**
@@ -104,28 +104,28 @@ public class Method extends Scope implements Validable{
         while (j < scope.size()-1){
             curLine = scope.get(j);
             System.out.println("curLine is " + curLine);
-            if(ifBlockPattern.matcher(curLine).lookingAt()){
+            if(Regex.ifBlock.matcher(curLine).lookingAt()){
                 j = checkIfBlock(j);
                 j++;
             }
-            else if(whileBlockPattern.matcher(curLine).lookingAt()){
+            else if(Regex.whileBlock.matcher(curLine).lookingAt()){
                 j = checkWhileBlock(j);
                 j++;
             }
-            else if(varDeclarationPattern.matcher(curLine).lookingAt()){
+            else if(Regex.varDeclaration.matcher(curLine).lookingAt()){
                 System.out.println("HERE");
                 checkVarDeclaration(curLine);
                 j++;
             }
-            else if(varAssignmentPattern.matcher(curLine).lookingAt()){
+            else if(Regex.varAssignment.matcher(curLine).lookingAt()){
                 checkVarAssignment(curLine);
                 j++;
             }
-            else if(methodCallPattern.matcher(curLine).lookingAt()){
+            else if(Regex.methodCall.matcher(curLine).lookingAt()){
                 checkMethodCall(curLine);
                 j++;
             }
-            else if(returnPattern.matcher(curLine).lookingAt()){
+            else if(Regex._return.matcher(curLine).lookingAt()){
                 j++;
             }
 
@@ -143,12 +143,18 @@ public class Method extends Scope implements Validable{
         return -1;
     }
 
-    private static void checkVarDeclaration(String curLine) {
-//        new Variable(curLine).isValid();
+    private void checkVarDeclaration(String curLine) {
+//        Variable variable = new Variable(curLine);
+//        variable.isValid();
+//        allVarList.add(variable);
     }
 
     private void checkVarAssignment(String curLine) {
-//        new Variable(curLine).isValid();
+//        String varName = FIND VARIABLE NAME
+//        variableExists(varName, curLine);
+//        newVal = FIND NEW ASSIGNMENT ARGUMENT
+//        variable.setVal(newVal);
+//        variable.isValid();
     }
 
     /**
@@ -157,10 +163,11 @@ public class Method extends Scope implements Validable{
      * @throws BadFormatException Exception.
      */
     private void checkMethodCall(String curLine) throws BadFormatException{
-        Matcher matcher = Pattern.compile(methodNameRegex).matcher(curLine);
+        Matcher matcher = Regex.methodName.matcher(curLine);
         matcher.lookingAt();
         String methodName = matcher.group(1);
         methodExists(methodName, curLine);
+        //THIS IS FALSE - REGEX FOR METHOD CALL SHOULD BE DIFFERENT
         String[] arguments = matcher.group(2).split(",");
         isMethodCallValid(arguments, curLine);
     }
@@ -177,14 +184,6 @@ public class Method extends Scope implements Validable{
         }
     }
 
-    public boolean isValid() throws BadFormatException{
-        System.out.println("starting method check");
-        checkMethodSignature(scope.get(0));
-        System.out.println("signature ok");
-        checkMethodBody();
-        return true;
-    }
-
     /**
      * Checks if the method call is valid, by comparing amount and type of arguments.
      * @param methodCallArgs The arguments in the method call.
@@ -196,7 +195,7 @@ public class Method extends Scope implements Validable{
             throw new WrongNumOfArgumentsException(line);
         }
         for (int j=0; j<methodCallArgs.length; j++){
-            if (!methodCallArgs[j].equals(methodArguments.get(j))){
+            if (!methodCallArgs[j].equals(methodArguments.get(j).type)){
                 throw new WrongVariableTypeException(line);
             }
         }

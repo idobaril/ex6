@@ -15,6 +15,11 @@ import java.util.regex.Pattern;
 
 public class Sjavac {
 
+    /**Holds a list of global variables declared in main.*/
+    public static ArrayList<String> globalVarList = null;
+    public static ArrayList<String> methodList = null;
+
+
     private static final int PATH_ARG = 0;
     private static final int LEGAL_CODE = 0;
     private static final int ILLEGAL_CODE = 1;
